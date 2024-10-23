@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Minesweeper</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        margin: 0;
+        background-color: #f8f9fa;
+      }
+
+      #minesweeper {
+        display: grid;
+        grid-template-columns: repeat(20, 30px);
+        grid-template-rows: repeat(20, 30px);
+        gap: 2px;
+      }
+
+      .cell {
+        width: 30px;
+        height: 30px;
+        background-color: #ddd;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 18px;
+        cursor: pointer;
+      }
+
+      .cell.revealed {
+        background-color: #eee;
+        cursor: default;
+      }
+
+      .cell.mine {
+        background-color: red;
+      }
+
+      .cell.flag {
+        background-color: yellow;
+      }
+
+      #restart {
+        margin-top: 20px;
+        padding: 10px 20px;
+        font-size: 16px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        display: none;
+      }
+
+      #restart:hover {
+        background-color: #0056b3;
+      }
+
+      #controls {
+        margin-bottom: 20px;
+      }
+
+      #timer,
+      #mines-count {
+        font-size: 18px;
+        margin: 0 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="controls">
+      <div id="mines-count">Mines left: 80</div>
+      <div id="timer">Time: 0</div>
+    </div>
+
+    <div id="minesweeper"></div>
+
+    <button id="restart">Restart Game</button>
+
+    <script>
+      const ROWS = 20;
+      const COLS = 20;
+      const MINES_COUNT = 80;
+      let grid = [];
+      let minesPlaced = 0;
+      let flagsPlaced = 0;
+      let timerInterval;
+      let timeElapsed = 0;
+      let gameOver = false;
+      const minesweeper = document.getElementById("minesweeper");
+      const minesCountElement = document.getElementById("mines-count");
+      const timerElement = document.getElementById("timer");
+      const restartButton = document.getElementById("restart");
+
+      // Функция для начала таймера
+      function startTimer() {
+        timerInterval = setInterval(() => {
+          timeElapsed++;
+          timerElement.textContent = `Time: ${timeElapsed}`;
+        }, 1000);
+      }
+
+      // Функция для остановки таймера
+      function stopTimer() {
+        clearInterval(timerInterval);
+      }
+
+      // Функция инициализации игры
+      function initGame() {
+        gameOver = false;
+        timeElapsed = 0;
+        minesPlaced = 0;
+        flagsPlaced = 0;
+        grid = [];
+        timerElement.textContent = "Time: 0";
+        minesCountElement.textContent = `Mines left: ${MINES_COUNT}`;
+        restartButton.style.display = "none"; // Скрыть кнопку перезапуска
+        minesweeper.innerHTML = ""; // Очистить игровое поле
+        startTimer();
+
+        // Создаем игровую сетку
+        for (let row = 0; row < ROWS; row++) {
+          grid[row] = [];
+          for (let col = 0; col < COLS; col++) {
+            const cell = document.createElement("div");
+            cell.classList.add("cell");
+            cell.dataset.row = row;
+            cell.dataset.col = col;
+            cell.addEventListener("click", handleCellClick);
+            cell.addEventListener("contextmenu", handleRightClick);
+            // Добавляем обработчики долгого нажатия
+            cell.addEventListener("touchstart", handleTouchStart);
+            cell.addEventListener("touchend", handleTouchEnd);
+            grid[row][col] = {
+              element: cell,
+              mine: false,
+              revealed: false,
+              flagged: false,
+              adjacentMines: 0,
+            };
+            minesweeper.appendChild(cell);
+          }
+        }
+
+        // Расставляем мины случайным образом
+        while (minesPlaced < MINES_COUNT) {
+          const row = Math.floor(Math.random() * ROWS);
+          const col = Math.floor(Math.random() * COLS);
+          if (!grid[row][col].mine) {
+            grid[row][col].mine = true;
+            minesPlaced++;
+          }
+        }
+
+        // Подсчитываем количество мин вокруг клеток
+        for (let row = 0; row < ROWS; row++) {
+          for (let col = 0; col < COLS; col++) {
+            if (!grid[row][col].mine) {
+              grid[row][col].adjacentMines = countAdjacentMines(row, col);
+            }
+          }
+        }
+      }
+
+      // Функция для подсчета мин вокруг клетки
+      function countAdjacentMines(row, col) {
+        const deltas = [-1, 0, 1];
+        let count = 0;
+        for (let dr of deltas) {
+          for (let dc of deltas) {
+            if (dr === 0 && dc === 0) continue;
+            const newRow = row + dr;
+            const newCol = col + dc;
+            if (newRow >= 0 && newRow < ROWS && newCol >= 0 && newCol < COLS) {
+              if (grid[newRow][newCol].mine) {
+                count++;
+              }
+            }
+          }
+        }
+        return count;
+      }
+
+      // Функция обработки клика по клетке
+      function handleCellClick(event) {
+        if (gameOver) return; // Если игра окончена, не обрабатываем клики
+        const row = parseInt(event.target.dataset.row);
+        const col = parseInt(event.target.dataset.col);
+        revealCell(row, col);
+      }
+
+      // Функция для обработки правого клика (установка флага)
+      function handleRightClick(event) {
+        event.preventDefault(); // Отменяем стандартное действие
+      }
+
+      // Обработчики для долгого нажатия
+      let longPressTimeout;
+
+      function handleTouchStart(event) {
+        event.preventDefault();
+        longPressTimeout = setTimeout(() => {
+          const row = parseInt(event.target.dataset.row);
+          const col = parseInt(event.target.dataset.col);
+          const cell = grid[row][col];
+
+          if (cell.revealed) return; // Не ставим флаг на открытые клетки
+
+          if (!cell.flagged && flagsPlaced < MINES_COUNT) {
+            cell.flagged = true;
+            cell.element.classList.add("flag");
+            flagsPlaced++;
+          } else if (cell.flagged) {
+            cell.flagged = false;
+            cell.element.classList.remove("flag");
+            flagsPlaced--;
+          }
+
+          minesCountElement.textContent = `Mines left: ${
+            MINES_COUNT - flagsPlaced
+          }`;
+        }, 600); // Долгое нажатие длится 600 мс
+      }
+
+      function handleTouchEnd() {
+        clearTimeout(longPressTimeout);
+      }
+
+      // Функция для открытия клетки
+      function revealCell(row, col) {
+        const cell = grid[row][col];
+        if (cell.revealed || cell.flagged) return;
+
+        cell.revealed = true;
+        cell.element.classList.add("revealed");
+
+        if (cell.mine) {
+          cell.element.classList.add("mine");
+          gameOver = true;
+          alert("Game Over!");
+          stopTimer();
+          restartButton.style.display = "block"; // Показываем кнопку перезапуска
+          return;
+        }
+
+        if (cell.adjacentMines > 0) {
+          cell.element.textContent = cell.adjacentMines;
+        } else {
+          revealAdjacentCells(row, col);
+        }
+
+        checkVictory(); // Проверяем победу после открытия клетки
+      }
+
+      // Функция для открытия соседних клеток
+      function revealAdjacentCells(row, col) {
+        const deltas = [-1, 0, 1];
+        for (let dr of deltas) {
+          for (let dc of deltas) {
+            const newRow = row + dr;
+            const newCol = col + dc;
+            if (newRow >= 0 && newRow < ROWS && newCol >= 0 && newCol < COLS) {
+              revealCell(newRow, newCol);
+            }
+          }
+        }
+      }
+
+      // Функция для проверки победы
+      function checkVictory() {
+        let allCellsRevealed = true;
+        for (let row = 0; row < ROWS; row++) {
+          for (let col = 0; col < COLS; col++) {
+            const cell = grid[row][col];
+            if (!cell.revealed && !cell.mine) {
+              allCellsRevealed = false;
+              break;
+            }
+          }
+          if (!allCellsRevealed) break;
+        }
+
+        if (allCellsRevealed) {
+          gameOver = true;
+          stopTimer();
+          alert(`You won! Time: ${timeElapsed} seconds.`);
+          sendMessageToChat(`I won the game in ${timeElapsed} seconds!`); // Отправляем сообщение в чат
+          restartButton.style.display = "block"; // Показываем кнопку перезапуска
+        }
+      }
+
+      // Функция отправки сообщения в чат (пример)
+      function sendMessageToChat(message) {
+        // Замените на свой токен бота и ID чата
+        const chatId = "chatId"; // Замените на динамическое значение
+        const token = "7700362550:AAHJv47-nEaHFJGvclx7qtFzCay0opMq7zI";
+        fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            chat_id: chatId,
+            text: message,
+          }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log("Message sent:", data);
+          })
+          .catch((error) => {
+            console.error("Error sending message:", error);
+          });
+      }
+
+      // Обработчик для кнопки перезапуска игры
+      restartButton.addEventListener("click", () => {
+        stopTimer();
+        initGame(); // Перезапуск игры
+      });
+
+      // Инициализация игры при первой загрузке
+      initGame();
+    </script>
+  </body>
+</html>
