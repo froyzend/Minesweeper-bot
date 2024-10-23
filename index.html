@@ -83,10 +83,6 @@
       let timerInterval;
       let seconds = 0;
 
-      // Укажите свой токен и chat_id
-      const token = token1; // Замените на ваш токен
-      const chatId = chatId2; // Замените на ваш chat_id
-
       function createBoard() {
         board = Array.from({ length: rows }, () => Array(cols).fill(0));
 
@@ -212,9 +208,6 @@
         if (won) {
           statusMessage.textContent = "Вы выиграли!";
           statusMessage.className = "game-won";
-          sendMessageToTelegram(
-            `Вы выиграли в игру Minesweeper! Время: ${seconds} секунд.`
-          );
         } else {
           statusMessage.textContent = "Игра окончена! Вы попали на мину!";
           statusMessage.className = "game-over";
@@ -246,22 +239,6 @@
         startTimer(); // Запускаем таймер
         document.getElementById("statusMessage").textContent = ""; // Очищаем сообщение
         document.getElementById("restartBtn").style.display = "none";
-      }
-
-      function sendMessageToTelegram(message) {
-        const url = `https://api.telegram.org/bot${token}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(
-          message
-        )}`;
-        fetch(url)
-          .then((response) => {
-            if (!response.ok) {
-              console.error(
-                "Ошибка при отправке сообщения:",
-                response.statusText
-              );
-            }
-          })
-          .catch((error) => console.error("Ошибка сети:", error));
       }
 
       document
