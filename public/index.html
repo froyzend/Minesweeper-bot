@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Minesweeper</title>
+
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -73,6 +74,7 @@
     <button id="restartBtn">Перезапустить игру</button>
     <div id="timer">Время: 0</div>
     <div id="statusMessage"></div>
+
     <script src="/index.js"></script>
     <script>
       const rows = 15; // 15 ячеек по вертикали
@@ -85,7 +87,7 @@
 
       // Укажите свой токен и chat_id
       const token = "7700362550:AAHJv47-nEaHFJGvclx7qtFzCay0opMq7zI"; // Замените на ваш токен
-      const chatId = msg.chat.id; // Замените на ваш chat_id
+      const chatId = chatId2; // Замените на ваш chat_id
 
       function createBoard() {
         board = Array.from({ length: rows }, () => Array(cols).fill(0));
@@ -243,7 +245,7 @@
         createGameBoard();
         revealedCount = 0;
         clearInterval(timerInterval);
-        startTimer();
+        startTimer(); // Запускаем таймер
         document.getElementById("statusMessage").textContent = ""; // Очищаем сообщение
         document.getElementById("restartBtn").style.display = "none";
       }
@@ -269,7 +271,7 @@
         .addEventListener("click", restartGame);
 
       // Запускаем игру при загрузке страницы
-      restartGame();
+      restartGame(); // Здесь запускается игра
     </script>
   </body>
 </html>
