@@ -83,11 +83,11 @@
     <div id="minesweeper"></div>
 
     <button id="restart">Restart Game</button>
-
+    <script src="index.js"></script>
     <script>
-      const ROWS = 20;
-      const COLS = 20;
-      const MINES_COUNT = 80;
+      const ROWS = 10;
+      const COLS = 10;
+      const MINES_COUNT = 20;
       let grid = [];
       let minesPlaced = 0;
       let flagsPlaced = 0;
@@ -99,7 +99,6 @@
       const timerElement = document.getElementById("timer");
       const restartButton = document.getElementById("restart");
 
-      // Функция для начала таймера
       function startTimer() {
         timerInterval = setInterval(() => {
           timeElapsed++;
@@ -107,12 +106,10 @@
         }, 1000);
       }
 
-      // Функция для остановки таймера
       function stopTimer() {
         clearInterval(timerInterval);
       }
 
-      // Функция инициализации игры
       function initGame() {
         gameOver = false;
         timeElapsed = 0;
@@ -121,11 +118,10 @@
         grid = [];
         timerElement.textContent = "Time: 0";
         minesCountElement.textContent = `Mines left: ${MINES_COUNT}`;
-        restartButton.style.display = "none"; // Скрыть кнопку перезапуска
-        minesweeper.innerHTML = ""; // Очистить игровое поле
+        restartButton.style.display = "none";
+        minesweeper.innerHTML = "";
         startTimer();
 
-        // Создаем игровую сетку
         for (let row = 0; row < ROWS; row++) {
           grid[row] = [];
           for (let col = 0; col < COLS; col++) {
@@ -135,7 +131,7 @@
             cell.dataset.col = col;
             cell.addEventListener("click", handleCellClick);
             cell.addEventListener("contextmenu", handleRightClick);
-            // Добавляем обработчики долгого нажатия
+
             cell.addEventListener("touchstart", handleTouchStart);
             cell.addEventListener("touchend", handleTouchEnd);
             grid[row][col] = {
@@ -149,7 +145,6 @@
           }
         }
 
-        // Расставляем мины случайным образом
         while (minesPlaced < MINES_COUNT) {
           const row = Math.floor(Math.random() * ROWS);
           const col = Math.floor(Math.random() * COLS);
@@ -159,7 +154,6 @@
           }
         }
 
-        // Подсчитываем количество мин вокруг клеток
         for (let row = 0; row < ROWS; row++) {
           for (let col = 0; col < COLS; col++) {
             if (!grid[row][col].mine) {
@@ -169,7 +163,6 @@
         }
       }
 
-      // Функция для подсчета мин вокруг клетки
       function countAdjacentMines(row, col) {
         const deltas = [-1, 0, 1];
         let count = 0;
@@ -188,20 +181,17 @@
         return count;
       }
 
-      // Функция обработки клика по клетке
       function handleCellClick(event) {
-        if (gameOver) return; // Если игра окончена, не обрабатываем клики
+        if (gameOver) return;
         const row = parseInt(event.target.dataset.row);
         const col = parseInt(event.target.dataset.col);
         revealCell(row, col);
       }
 
-      // Функция для обработки правого клика (установка флага)
       function handleRightClick(event) {
-        event.preventDefault(); // Отменяем стандартное действие
+        event.preventDefault();
       }
 
-      // Обработчики для долгого нажатия
       let longPressTimeout;
 
       function handleTouchStart(event) {
@@ -211,7 +201,7 @@
           const col = parseInt(event.target.dataset.col);
           const cell = grid[row][col];
 
-          if (cell.revealed) return; // Не ставим флаг на открытые клетки
+          if (cell.revealed) return;
 
           if (!cell.flagged && flagsPlaced < MINES_COUNT) {
             cell.flagged = true;
@@ -226,14 +216,13 @@
           minesCountElement.textContent = `Mines left: ${
             MINES_COUNT - flagsPlaced
           }`;
-        }, 600); // Долгое нажатие длится 600 мс
+        }, 600);
       }
 
       function handleTouchEnd() {
         clearTimeout(longPressTimeout);
       }
 
-      // Функция для открытия клетки
       function revealCell(row, col) {
         const cell = grid[row][col];
         if (cell.revealed || cell.flagged) return;
@@ -246,7 +235,7 @@
           gameOver = true;
           alert("Game Over!");
           stopTimer();
-          restartButton.style.display = "block"; // Показываем кнопку перезапуска
+          restartButton.style.display = "block";
           return;
         }
 
@@ -256,10 +245,9 @@
           revealAdjacentCells(row, col);
         }
 
-        checkVictory(); // Проверяем победу после открытия клетки
+        checkVictory();
       }
 
-      // Функция для открытия соседних клеток
       function revealAdjacentCells(row, col) {
         const deltas = [-1, 0, 1];
         for (let dr of deltas) {
@@ -273,7 +261,6 @@
         }
       }
 
-      // Функция для проверки победы
       function checkVictory() {
         let allCellsRevealed = true;
         for (let row = 0; row < ROWS; row++) {
@@ -291,15 +278,13 @@
           gameOver = true;
           stopTimer();
           alert(`You won! Time: ${timeElapsed} seconds.`);
-          sendMessageToChat(`I won the game in ${timeElapsed} seconds!`); // Отправляем сообщение в чат
-          restartButton.style.display = "block"; // Показываем кнопку перезапуска
+          sendMessageToChat(`I won the game in ${timeElapsed} seconds!`);
+          restartButton.style.display = "block";
         }
       }
 
-      // Функция отправки сообщения в чат (пример)
       function sendMessageToChat(message) {
-        // Замените на свой токен бота и ID чата
-        const chatId = "chatId"; // Замените на динамическое значение
+        const chatId = "chatId";
         const token = "7700362550:AAHJv47-nEaHFJGvclx7qtFzCay0opMq7zI";
         fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
           method: "POST",
@@ -320,13 +305,11 @@
           });
       }
 
-      // Обработчик для кнопки перезапуска игры
       restartButton.addEventListener("click", () => {
         stopTimer();
-        initGame(); // Перезапуск игры
+        initGame();
       });
 
-      // Инициализация игры при первой загрузке
       initGame();
     </script>
   </body>
