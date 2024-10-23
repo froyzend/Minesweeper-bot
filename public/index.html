@@ -50,6 +50,20 @@
         display: none;
         margin-top: 20px;
       }
+
+      #statusMessage {
+        font-size: 20px;
+        margin-top: 20px;
+        color: green;
+      }
+
+      .game-over {
+        color: red;
+      }
+
+      .game-won {
+        color: green;
+      }
     </style>
   </head>
   <body>
@@ -57,8 +71,9 @@
     <div id="gameBoard"></div>
     <button id="restartBtn">Перезапустить игру</button>
     <div id="timer">Время: 0</div>
+    <div id="statusMessage"></div>
 
-    <script src="index.js"></script>
+    <script src="/index.js"></script>
     <script>
       const rows = 10;
       const cols = 10;
@@ -71,6 +86,7 @@
       function createBoard() {
         board = Array.from({ length: rows }, () => Array(cols).fill(0));
 
+        // Расставляем мины
         let minesPlaced = 0;
         while (minesPlaced < totalMines) {
           const row = Math.floor(Math.random() * rows);
@@ -79,6 +95,7 @@
           if (board[row][col] !== "X") {
             board[row][col] = "X";
             minesPlaced++;
+            // Увеличиваем счетчик мин вокруг
             for (let r = row - 1; r <= row + 1; r++) {
               for (let c = col - 1; c <= col + 1; c++) {
                 if (
@@ -137,6 +154,7 @@
           if (mineCount > 0) {
             cell.textContent = mineCount;
           } else {
+            // Если вокруг нет мин, открываем соседние клетки
             for (let r = row - 1; r <= row + 1; r++) {
               for (let c = col - 1; c <= col + 1; c++) {
                 const neighbor = document.querySelector(
@@ -171,7 +189,15 @@
           cell.removeEventListener("click", () => revealCell(cell));
         });
 
-        alert(won ? "Вы выиграли!" : "Игра окончена! Вы попали на мину!");
+        const statusMessage = document.getElementById("statusMessage");
+        if (won) {
+          statusMessage.textContent = "Вы выиграли!";
+          statusMessage.className = "game-won";
+        } else {
+          statusMessage.textContent = "Игра окончена! Вы попали на мину!";
+          statusMessage.className = "game-over";
+        }
+
         document.getElementById("restartBtn").style.display = "block";
       }
 
@@ -196,6 +222,7 @@
         revealedCount = 0;
         clearInterval(timerInterval);
         startTimer();
+        document.getElementById("statusMessage").textContent = ""; // Очищаем сообщение
         document.getElementById("restartBtn").style.display = "none";
       }
 
