@@ -7,36 +7,31 @@
     <style>
       body {
         font-family: Arial, sans-serif;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        height: 100vh;
-        margin: 0;
-        background-color: #f8f9fa;
+        text-align: center;
       }
 
-      #minesweeper {
+      #gameBoard {
         display: grid;
-        grid-template-columns: repeat(20, 30px);
-        grid-template-rows: repeat(20, 30px);
-        gap: 2px;
+        grid-template-columns: repeat(10, 40px);
+        grid-template-rows: repeat(10, 40px);
+        gap: 1px;
+        margin: 20px auto;
       }
 
       .cell {
-        width: 30px;
-        height: 30px;
-        background-color: #ddd;
+        width: 40px;
+        height: 40px;
         display: flex;
         justify-content: center;
         align-items: center;
-        font-size: 18px;
+        background-color: #e0e0e0;
+        border: 1px solid #aaa;
         cursor: pointer;
+        font-size: 20px;
       }
 
       .cell.revealed {
-        background-color: #eee;
-        cursor: default;
+        background-color: #f0f0f0;
       }
 
       .cell.mine {
@@ -47,270 +42,168 @@
         background-color: yellow;
       }
 
-      #restart {
-        margin-top: 20px;
-        padding: 10px 20px;
-        font-size: 16px;
-        background-color: #007bff;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
+      #timer {
+        font-size: 20px;
+      }
+
+      #restartBtn {
         display: none;
-      }
-
-      #restart:hover {
-        background-color: #0056b3;
-      }
-
-      #controls {
-        margin-bottom: 20px;
-      }
-
-      #timer,
-      #mines-count {
-        font-size: 18px;
-        margin: 0 10px;
+        margin-top: 20px;
       }
     </style>
   </head>
   <body>
-    <div id="controls">
-      <div id="mines-count">Mines left: 80</div>
-      <div id="timer">Time: 0</div>
-    </div>
+    <h1>Minesweeper</h1>
+    <div id="gameBoard"></div>
+    <button id="restartBtn">Перезапустить игру</button>
+    <div id="timer">Время: 0</div>
 
-    <div id="minesweeper"></div>
-
-    <button id="restart">Restart Game</button>
-    <script src="index.js"></script>
     <script>
-      const ROWS = 10;
-      const COLS = 10;
-      const MINES_COUNT = 20;
-      let grid = [];
-      let minesPlaced = 0;
-      let flagsPlaced = 0;
+      const rows = 10;
+      const cols = 10;
+      const totalMines = 20;
+      let board = [];
+      let revealedCount = 0;
       let timerInterval;
-      let timeElapsed = 0;
-      let gameOver = false;
-      const minesweeper = document.getElementById("minesweeper");
-      const minesCountElement = document.getElementById("mines-count");
-      const timerElement = document.getElementById("timer");
-      const restartButton = document.getElementById("restart");
+      let seconds = 0;
 
-      function startTimer() {
-        timerInterval = setInterval(() => {
-          timeElapsed++;
-          timerElement.textContent = `Time: ${timeElapsed}`;
-        }, 1000);
-      }
+      function createBoard() {
+        board = Array.from({ length: rows }, () => Array(cols).fill(0));
 
-      function stopTimer() {
-        clearInterval(timerInterval);
-      }
+        let minesPlaced = 0;
+        while (minesPlaced < totalMines) {
+          const row = Math.floor(Math.random() * rows);
+          const col = Math.floor(Math.random() * cols);
 
-      function initGame() {
-        gameOver = false;
-        timeElapsed = 0;
-        minesPlaced = 0;
-        flagsPlaced = 0;
-        grid = [];
-        timerElement.textContent = "Time: 0";
-        minesCountElement.textContent = `Mines left: ${MINES_COUNT}`;
-        restartButton.style.display = "none";
-        minesweeper.innerHTML = "";
-        startTimer();
-
-        for (let row = 0; row < ROWS; row++) {
-          grid[row] = [];
-          for (let col = 0; col < COLS; col++) {
-            const cell = document.createElement("div");
-            cell.classList.add("cell");
-            cell.dataset.row = row;
-            cell.dataset.col = col;
-            cell.addEventListener("click", handleCellClick);
-            cell.addEventListener("contextmenu", handleRightClick);
-
-            cell.addEventListener("touchstart", handleTouchStart);
-            cell.addEventListener("touchend", handleTouchEnd);
-            grid[row][col] = {
-              element: cell,
-              mine: false,
-              revealed: false,
-              flagged: false,
-              adjacentMines: 0,
-            };
-            minesweeper.appendChild(cell);
-          }
-        }
-
-        while (minesPlaced < MINES_COUNT) {
-          const row = Math.floor(Math.random() * ROWS);
-          const col = Math.floor(Math.random() * COLS);
-          if (!grid[row][col].mine) {
-            grid[row][col].mine = true;
+          if (board[row][col] !== "X") {
+            board[row][col] = "X";
             minesPlaced++;
-          }
-        }
-
-        for (let row = 0; row < ROWS; row++) {
-          for (let col = 0; col < COLS; col++) {
-            if (!grid[row][col].mine) {
-              grid[row][col].adjacentMines = countAdjacentMines(row, col);
-            }
-          }
-        }
-      }
-
-      function countAdjacentMines(row, col) {
-        const deltas = [-1, 0, 1];
-        let count = 0;
-        for (let dr of deltas) {
-          for (let dc of deltas) {
-            if (dr === 0 && dc === 0) continue;
-            const newRow = row + dr;
-            const newCol = col + dc;
-            if (newRow >= 0 && newRow < ROWS && newCol >= 0 && newCol < COLS) {
-              if (grid[newRow][newCol].mine) {
-                count++;
+            for (let r = row - 1; r <= row + 1; r++) {
+              for (let c = col - 1; c <= col + 1; c++) {
+                if (
+                  r >= 0 &&
+                  r < rows &&
+                  c >= 0 &&
+                  c < cols &&
+                  board[r][c] !== "X"
+                ) {
+                  board[r][c]++;
+                }
               }
             }
           }
         }
-        return count;
       }
 
-      function handleCellClick(event) {
-        if (gameOver) return;
-        const row = parseInt(event.target.dataset.row);
-        const col = parseInt(event.target.dataset.col);
-        revealCell(row, col);
-      }
+      function createGameBoard() {
+        const gameBoard = document.getElementById("gameBoard");
+        gameBoard.innerHTML = "";
 
-      function handleRightClick(event) {
-        event.preventDefault();
-      }
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            const cell = document.createElement("div");
+            cell.className = "cell";
+            cell.dataset.row = r;
+            cell.dataset.col = c;
 
-      let longPressTimeout;
+            cell.addEventListener("click", () => {
+              if (!cell.classList.contains("revealed")) {
+                revealCell(cell);
+              }
+            });
 
-      function handleTouchStart(event) {
-        event.preventDefault();
-        longPressTimeout = setTimeout(() => {
-          const row = parseInt(event.target.dataset.row);
-          const col = parseInt(event.target.dataset.col);
-          const cell = grid[row][col];
+            cell.addEventListener("contextmenu", (e) => {
+              e.preventDefault();
+              toggleFlag(cell);
+            });
 
-          if (cell.revealed) return;
-
-          if (!cell.flagged && flagsPlaced < MINES_COUNT) {
-            cell.flagged = true;
-            cell.element.classList.add("flag");
-            flagsPlaced++;
-          } else if (cell.flagged) {
-            cell.flagged = false;
-            cell.element.classList.remove("flag");
-            flagsPlaced--;
+            gameBoard.appendChild(cell);
           }
-
-          minesCountElement.textContent = `Mines left: ${
-            MINES_COUNT - flagsPlaced
-          }`;
-        }, 600);
-      }
-
-      function handleTouchEnd() {
-        clearTimeout(longPressTimeout);
-      }
-
-      function revealCell(row, col) {
-        const cell = grid[row][col];
-        if (cell.revealed || cell.flagged) return;
-
-        cell.revealed = true;
-        cell.element.classList.add("revealed");
-
-        if (cell.mine) {
-          cell.element.classList.add("mine");
-          gameOver = true;
-          alert("Game Over!");
-          stopTimer();
-          restartButton.style.display = "block";
-          return;
         }
+      }
 
-        if (cell.adjacentMines > 0) {
-          cell.element.textContent = cell.adjacentMines;
+      function revealCell(cell) {
+        const row = cell.dataset.row;
+        const col = cell.dataset.col;
+
+        if (board[row][col] === "X") {
+          cell.classList.add("mine");
+          gameOver(false);
         } else {
-          revealAdjacentCells(row, col);
+          cell.classList.add("revealed");
+          revealedCount++;
+          const mineCount = board[row][col];
+          if (mineCount > 0) {
+            cell.textContent = mineCount;
+          } else {
+            for (let r = row - 1; r <= row + 1; r++) {
+              for (let c = col - 1; c <= col + 1; c++) {
+                const neighbor = document.querySelector(
+                  `.cell[data-row="${r}"][data-col="${c}"]`
+                );
+                if (neighbor && !neighbor.classList.contains("revealed")) {
+                  revealCell(neighbor);
+                }
+              }
+            }
+          }
         }
-
         checkVictory();
       }
 
-      function revealAdjacentCells(row, col) {
-        const deltas = [-1, 0, 1];
-        for (let dr of deltas) {
-          for (let dc of deltas) {
-            const newRow = row + dr;
-            const newCol = col + dc;
-            if (newRow >= 0 && newRow < ROWS && newCol >= 0 && newCol < COLS) {
-              revealCell(newRow, newCol);
-            }
-          }
+      function toggleFlag(cell) {
+        if (!cell.classList.contains("revealed")) {
+          cell.classList.toggle("flag");
         }
+      }
+
+      function gameOver(won) {
+        clearInterval(timerInterval);
+        const cells = document.querySelectorAll(".cell");
+        cells.forEach((cell) => {
+          if (
+            cell.classList.contains("flag") &&
+            board[cell.dataset.row][cell.dataset.col] !== "X"
+          ) {
+            cell.classList.add("mine");
+          }
+          cell.removeEventListener("click", () => revealCell(cell));
+        });
+
+        alert(won ? "Вы выиграли!" : "Игра окончена! Вы попали на мину!");
+        document.getElementById("restartBtn").style.display = "block";
       }
 
       function checkVictory() {
-        let allCellsRevealed = true;
-        for (let row = 0; row < ROWS; row++) {
-          for (let col = 0; col < COLS; col++) {
-            const cell = grid[row][col];
-            if (!cell.revealed && !cell.mine) {
-              allCellsRevealed = false;
-              break;
-            }
-          }
-          if (!allCellsRevealed) break;
-        }
-
-        if (allCellsRevealed) {
-          gameOver = true;
-          stopTimer();
-          alert(`You won! Time: ${timeElapsed} seconds.`);
-          sendMessageToChat(`I won the game in ${timeElapsed} seconds!`);
-          restartButton.style.display = "block";
+        if (revealedCount === rows * cols - totalMines) {
+          gameOver(true);
         }
       }
 
-      function sendMessageToChat(message) {
-        const chatId = "chatId";
-        const token = "7700362550:AAHJv47-nEaHFJGvclx7qtFzCay0opMq7zI";
-        fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            chat_id: chatId,
-            text: message,
-          }),
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            console.log("Message sent:", data);
-          })
-          .catch((error) => {
-            console.error("Error sending message:", error);
-          });
+      function startTimer() {
+        seconds = 0;
+        document.getElementById("timer").textContent = "Время: 0";
+        timerInterval = setInterval(() => {
+          seconds++;
+          document.getElementById("timer").textContent = `Время: ${seconds}`;
+        }, 1000);
       }
 
-      restartButton.addEventListener("click", () => {
-        stopTimer();
-        initGame();
-      });
+      function restartGame() {
+        createBoard();
+        createGameBoard();
+        revealedCount = 0;
+        clearInterval(timerInterval);
+        startTimer();
+        document.getElementById("restartBtn").style.display = "none";
+      }
 
-      initGame();
+      document
+        .getElementById("restartBtn")
+        .addEventListener("click", restartGame);
+
+      // Запускаем игру при загрузке страницы
+      restartGame();
     </script>
   </body>
 </html>
