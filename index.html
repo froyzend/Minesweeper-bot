@@ -8,7 +8,7 @@
       body {
         font-family: Arial, sans-serif;
         text-align: center;
-        user-select: none; /* Отключает выделение текста */
+        user-select: none; /* Отключает выделение текста на всей странице */
       }
 
       #gameBoard {
@@ -29,6 +29,10 @@
         border: 1px solid #aaa;
         cursor: pointer;
         font-size: 20px;
+        -webkit-user-select: none; /* Отключает выделение текста на ячейках */
+        -moz-user-select: none; /* Отключает выделение текста на ячейках для Firefox */
+        -ms-user-select: none; /* Отключает выделение текста на ячейках для IE */
+        user-select: none; /* Отключает выделение текста на ячейках */
       }
 
       .cell.revealed {
@@ -73,7 +77,7 @@
     <button id="restartBtn">Перезапустить игру</button>
     <div id="timer">Время: 0</div>
     <div id="statusMessage"></div>
-    <script src="/index.js"></script>
+    <script src="index.js"></script>
     <script>
       const rows = 15; // 15 ячеек по вертикали
       const cols = 9; // 9 ячеек по горизонтали
