@@ -77,7 +77,7 @@
     <button id="restartBtn">Перезапустить игру</button>
     <div id="timer">Время: 0</div>
     <div id="statusMessage"></div>
-    <script src="index.js"></script>
+
     <script>
       const rows = 15; // 15 ячеек по вертикали
       const cols = 9; // 9 ячеек по горизонтали
@@ -163,7 +163,7 @@
 
         if (board[row][col] === "X") {
           cell.classList.add("mine");
-          gameOver(false);
+          gameOver(false); // Игра окончена, если нажали на мину
         } else if (!cell.classList.contains("revealed")) {
           cell.classList.add("revealed");
           revealedCount++;
