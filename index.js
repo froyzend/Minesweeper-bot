@@ -17,7 +17,7 @@ bot.onText(/\/start/, (msg) => {
   };
 
   // Отправляем приветственное сообщение с ссылкой на игру
-  const gameUrl = "https://your-app-name.vercel.app"; // Замените на вашу ссылку Vercel
+  const gameUrl = "https://minesweeper-bot-seven.vercel.app/"; // Замените на вашу ссылку Vercel
   bot.sendMessage(
     chatId,
     `Добро пожаловать в игру Сапер! Нажмите /play для начала. Вот ваша ссылка на игру: ${gameUrl}`
@@ -32,7 +32,7 @@ bot.onText(/\/play/, (msg) => {
   userGames[chatId].inGame = true;
 
   // Отправляем сообщение с ссылкой на игру
-  const gameUrl = "https://your-app-name.vercel.app"; // Замените на вашу ссылку Vercel
+  const gameUrl = "https://minesweeper-bot-seven.vercel.app/"; // Замените на вашу ссылку Vercel
   bot.sendMessage(chatId, `Игра начинается! Вот ваша ссылка: ${gameUrl}`);
 });
 
