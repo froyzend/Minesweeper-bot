@@ -13,10 +13,9 @@ bot.onText(/\/start/, (msg) => {
   // Сохраняем chat_id в объекте для использования в будущем
   userGames[chatId] = {
     inGame: false,
-    // Другие параметры состояния игры
   };
 
-  // Отправляем приветственное сообщение с ссылкой на игру
+  // Обновленная ссылка на игру
   const gameUrl = "https://minesweeper-bot-seven.vercel.app/"; // Замените на вашу ссылку Vercel
   bot.sendMessage(
     chatId,
@@ -31,7 +30,7 @@ bot.onText(/\/play/, (msg) => {
   // Здесь можно инициализировать игру и отправить ссылку на веб-страницу
   userGames[chatId].inGame = true;
 
-  // Отправляем сообщение с ссылкой на игру
+  // Обновленная ссылка на игру
   const gameUrl = "https://minesweeper-bot-seven.vercel.app/"; // Замените на вашу ссылку Vercel
   bot.sendMessage(chatId, `Игра начинается! Вот ваша ссылка: ${gameUrl}`);
 });
@@ -43,14 +42,10 @@ function sendGameResult(chatId, resultMessage) {
 
 // Пример использования функции отправки результата после победы
 function checkVictory(chatId) {
-  // Логика проверки победы
-  let victory = true; // замените на вашу логику проверки
+  let victory = true; // Замените на вашу логику проверки
 
   if (victory) {
-    // Останавливаем игру
     userGames[chatId].inGame = false;
-
-    // Отправляем результат пользователю
     sendGameResult(chatId, "Вы выиграли игру! Поздравляем!");
   }
 }
