@@ -8,6 +8,7 @@
       body {
         font-family: Arial, sans-serif;
         text-align: center;
+        user-select: none; /* Отключает выделение текста */
       }
 
       #gameBoard {
@@ -74,13 +75,17 @@
     <div id="statusMessage"></div>
     <script src="/index.js"></script>
     <script>
-      const rows = 15; // Изменено на 15
-      const cols = 9; // Изменено на 9
-      const totalMines = 16; // Изменено на 16
+      const rows = 15; // 15 ячеек по вертикали
+      const cols = 9; // 9 ячеек по горизонтали
+      const totalMines = 16; // 16 мин
       let board = [];
       let revealedCount = 0;
       let timerInterval;
       let seconds = 0;
+
+      // Укажите свой токен и chat_id
+      const token = "7700362550:AAHJv47-nEaHFJGvclx7qtFzCay0opMq7zI"; // Замените на ваш токен
+      const chatId = msg.chat.id; // Замените на ваш chat_id
 
       function createBoard() {
         board = Array.from({ length: rows }, () => Array(cols).fill(0));
@@ -129,7 +134,7 @@
               }
             });
 
-            // Добавлено длительное нажатие для установки флага
+            // Долгое нажатие для установки флага
             cell.addEventListener("contextmenu", (e) => {
               e.preventDefault();
               toggleFlag(cell);
@@ -207,6 +212,9 @@
         if (won) {
           statusMessage.textContent = "Вы выиграли!";
           statusMessage.className = "game-won";
+          sendMessageToTelegram(
+            `Вы выиграли в игру Minesweeper! Время: ${seconds} секунд.`
+          );
         } else {
           statusMessage.textContent = "Игра окончена! Вы попали на мину!";
           statusMessage.className = "game-over";
@@ -238,6 +246,22 @@
         startTimer();
         document.getElementById("statusMessage").textContent = ""; // Очищаем сообщение
         document.getElementById("restartBtn").style.display = "none";
+      }
+
+      function sendMessageToTelegram(message) {
+        const url = `https://api.telegram.org/bot${token}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(
+          message
+        )}`;
+        fetch(url)
+          .then((response) => {
+            if (!response.ok) {
+              console.error(
+                "Ошибка при отправке сообщения:",
+                response.statusText
+              );
+            }
+          })
+          .catch((error) => console.error("Ошибка сети:", error));
       }
 
       document
