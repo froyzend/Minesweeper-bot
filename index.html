@@ -2,13 +2,23 @@
 <html lang="ru">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=no"
+    />
+    <!-- Отключаем масштабирование -->
     <title>Minesweeper</title>
     <style>
       body {
         font-family: Arial, sans-serif;
         text-align: center;
         user-select: none; /* Отключает выделение текста на всей странице */
+      }
+
+      h1 {
+        font-size: 30px; /* Уменьшаем размер заголовка вдвое */
+        color: green; /* Цвет заголовка зеленый */
+        margin: 20px 0; /* Отступ сверху и снизу */
       }
 
       #gameBoard {
