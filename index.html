@@ -153,6 +153,11 @@
             cell.addEventListener("touchend", () => {
               clearTimeout(pressTimer);
             });
+
+            // Убираем выделение текста при касании
+            cell.addEventListener("touchmove", (e) => {
+              e.preventDefault();
+            });
           }
         }
       }
