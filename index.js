@@ -1,59 +1,82 @@
 const { Telegraf } = require("telegraf");
-const express = require("express");
-const app = express();
-const port = process.env.PORT || 3000;
 
-// Укажите свой токен, полученный от BotFather
 const bot = new Telegraf("7700362550:AAHJv47-nEaHFJGvclx7qtFzCay0opMq7zI");
+
+// Массив для хранения результатов
+let leaderboard = [];
 
 // Обработка команды /start
 bot.start((ctx) => {
   ctx.reply(
-    "Добро пожаловать в Minesweeper! Нажмите на кнопку ниже, чтобы начать игру.",
-    {
-      reply_markup: {
-        inline_keyboard: [
-          [
-            {
-              text: "Начать игру",
-              url: "https://minesweeper-bot-seven.vercel.app/",
-            },
-          ],
-        ],
-      },
-    }
+    "Добро пожаловать в Minesweeper! Напишите /play, чтобы начать игру."
   );
 });
 
-// Обработка команды /help
-bot.help((ctx) => {
+// Обработка команды /play
+bot.command("play", (ctx) => {
   ctx.reply(
-    'Это бот для игры в Minesweeper. Нажмите на кнопку "Начать игру", чтобы играть!'
+    "Начинаем игру! Нажмите на ссылку для доступа к игре: https://minesweeper-bot-seven.vercel.app/"
   );
 });
 
-// Обработка всех текстовых сообщений
+// Обработка сообщения о завершении игры
 bot.on("text", (ctx) => {
-  ctx.reply("Пожалуйста, используйте кнопки для взаимодействия с ботом.");
+  const message = ctx.message.text.toLowerCase();
+
+  if (message.includes("@minesweeper_v001_bot")) {
+    ctx.reply(
+      "Вы можете начать игру, перейдя по ссылке: https://minesweeper-bot-seven.vercel.app/"
+    );
+  }
 });
 
-// Запускаем сервер
-app.use(express.json());
-app.use(express.static("public")); // Отдача статических файлов из папки 'public'
+// Обработка результатов игры
+bot.on("game_result", (ctx) => {
+  const userId = ctx.from.id; // ID пользователя
+  const username = ctx.from.username || ctx.from.first_name; // Имя пользователя
+  const timeTaken = ctx.message.timeTaken; // Время, затраченное на игру (это должно быть получено из вашего кода игры)
 
-app.listen(port, () => {
-  console.log(`Сервер запущен на http://localhost:${port}`);
+  // Проверка на наличие пользователя в скорборде
+  const userIndex = leaderboard.findIndex((entry) => entry.userId === userId);
+
+  if (userIndex !== -1) {
+    // Если пользователь уже есть, обновляем его результат, если он быстрее
+    if (timeTaken < leaderboard[userIndex].time) {
+      leaderboard[userIndex].time = timeTaken;
+      ctx.reply(`${username}, ваш новый рекорд: ${timeTaken} секунд!`);
+    }
+  } else {
+    // Если пользователя нет, добавляем его в скорборд
+    leaderboard.push({ userId, username, time: timeTaken });
+  }
+
+  // Сортировка скорборда по времени
+  leaderboard.sort((a, b) => a.time - b.time);
+
+  // Ограничение до 10 лучших
+  leaderboard = leaderboard.slice(0, 10);
+
+  // Проверка на рекорд
+  if (timeTaken === leaderboard[0].time) {
+    ctx.reply(
+      `🏆 ${username} побил рекорд! Новый лучший результат: ${timeTaken} секунд!`
+    );
+    // Уведомляем весь чат о новом рекорде
+    bot.telegram.sendMessage(
+      ctx.chat.id,
+      `🏆 ${username} побил рекорд на уровне! Новое время: ${timeTaken} секунд!`
+    );
+  }
+
+  // Отправка текущего скорборда
+  const leaderboardMessage = leaderboard
+    .map(
+      (entry, index) => `${index + 1}. ${entry.username} - ${entry.time} секунд`
+    )
+    .join("\n");
+  ctx.reply(`Текущий скорборд:\n${leaderboardMessage}`);
 });
 
 // Запускаем бота
-bot.launch().then(() => {
-  console.log("Бот запущен");
-});
-
-// Обработка ошибок
-process.once("SIGINT", () => {
-  bot.stop("SIGINT");
-});
-process.once("SIGTERM", () => {
-  bot.stop("SIGTERM");
-});
+bot.launch();
+console.log("Бот запущен");

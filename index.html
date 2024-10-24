@@ -4,268 +4,292 @@
     <meta charset="UTF-8" />
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1.0, user-scalable=no"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
     />
-    <!-- Отключаем масштабирование -->
     <title>Minesweeper</title>
     <style>
       body {
         font-family: Arial, sans-serif;
+        margin: 0;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      #header {
+        display: flex;
+        justify-content: space-between;
+        width: 360px;
+        margin: 20px;
+      }
+
+      .info-box {
+        background-color: black;
+        color: red;
+        font-size: 24px;
+        padding: 10px;
+        width: 100px;
         text-align: center;
-        user-select: none; /* Отключает выделение текста на всей странице */
+        border-radius: 5px;
       }
 
-      h1 {
-        font-size: 30px; /* Уменьшаем размер заголовка вдвое */
-        color: green; /* Цвет заголовка зеленый */
-        margin: 20px 0; /* Отступ сверху и снизу */
+      #modeButton {
+        background-color: white;
+        color: black;
+        font-size: 20px;
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        width: 150px;
       }
 
-      #gameBoard {
+      #game {
         display: grid;
         grid-template-columns: repeat(9, 40px);
         grid-template-rows: repeat(15, 40px);
         gap: 1px;
         margin: 20px auto;
+        position: relative;
       }
 
       .cell {
         width: 40px;
         height: 40px;
+        background-color: #eee;
+        border: 1px solid #ccc;
         display: flex;
-        justify-content: center;
         align-items: center;
-        background-color: #e0e0e0;
-        border: 1px solid #aaa;
+        justify-content: center;
+        font-size: 18px;
         cursor: pointer;
-        font-size: 20px;
-        -webkit-user-select: none; /* Отключает выделение текста на ячейках */
-        -moz-user-select: none; /* Отключает выделение текста на ячейках для Firefox */
-        -ms-user-select: none; /* Отключает выделение текста на ячейках для IE */
-        user-select: none; /* Отключает выделение текста на ячейках */
+        user-select: none; /* Отключаем выделение текста */
       }
 
       .cell.revealed {
-        background-color: #f0f0f0;
+        background-color: #fff;
+        cursor: default;
       }
 
       .cell.mine {
         background-color: red;
       }
-
-      .cell.flag {
-        background-color: yellow;
-      }
-
-      #timer {
-        font-size: 20px;
-      }
-
-      #restartBtn {
-        display: none;
-        margin-top: 20px;
-      }
-
-      #statusMessage {
-        font-size: 20px;
-        margin-top: 20px;
-        color: green;
-      }
-
-      .game-over {
-        color: red;
-      }
-
-      .game-won {
-        color: green;
-      }
     </style>
   </head>
   <body>
-    <h1>Minesweeper</h1>
-    <div id="gameBoard"></div>
-    <button id="restartBtn">Перезапустить игру</button>
-    <div id="timer">Время: 0</div>
-    <div id="statusMessage"></div>
+    <div id="header">
+      <div id="minesLeft" class="info-box">16</div>
+      <button id="modeButton">Открытие</button>
+      <div id="timer" class="info-box">0</div>
+    </div>
+
+    <div id="game"></div>
 
     <script>
-      const rows = 15; // 15 ячеек по вертикали
-      const cols = 9; // 9 ячеек по горизонтали
-      const totalMines = 16; // 16 мин
+      const rows = 15;
+      const cols = 9;
+      const totalMines = 16;
       let board = [];
-      let revealedCount = 0;
-      let timerInterval;
-      let seconds = 0;
+      let gameOver = false;
+      let timeTaken = 0;
+      let timer;
+      let minesLeft = totalMines;
+      let flagMode = false; // Флаг для переключения режима
 
+      // Функция инициализации игры
+      function initGame() {
+        board = createBoard();
+        renderBoard();
+        startTimer();
+        document.getElementById("minesLeft").textContent = minesLeft;
+      }
+
+      // Функция создания поля игры
       function createBoard() {
-        board = Array.from({ length: rows }, () => Array(cols).fill(0));
+        const board = Array(rows)
+          .fill(null)
+          .map(() => Array(cols).fill({}));
+        let mines = 0;
 
-        // Расставляем мины
-        let minesPlaced = 0;
-        while (minesPlaced < totalMines) {
+        while (mines < totalMines) {
           const row = Math.floor(Math.random() * rows);
           const col = Math.floor(Math.random() * cols);
+          if (!board[row][col].mine) {
+            board[row][col] = { mine: true, revealed: false, flagged: false };
+            mines++;
+          }
+        }
 
-          if (board[row][col] !== "X") {
-            board[row][col] = "X";
-            minesPlaced++;
-            // Увеличиваем счетчик мин вокруг
-            for (let r = row - 1; r <= row + 1; r++) {
-              for (let c = col - 1; c <= col + 1; c++) {
-                if (
-                  r >= 0 &&
-                  r < rows &&
-                  c >= 0 &&
-                  c < cols &&
-                  board[r][c] !== "X"
-                ) {
-                  board[r][c]++;
-                }
-              }
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            if (!board[r][c].mine) {
+              const adjacentMines = countAdjacentMines(board, r, c);
+              board[r][c] = {
+                mine: false,
+                revealed: false,
+                adjacentMines: adjacentMines,
+                flagged: false,
+              };
             }
           }
         }
+        return board;
       }
 
-      function createGameBoard() {
-        const gameBoard = document.getElementById("gameBoard");
-        gameBoard.innerHTML = "";
+      // Функция подсчета соседних мин
+      function countAdjacentMines(board, row, col) {
+        let count = 0;
+        for (
+          let r = Math.max(0, row - 1);
+          r <= Math.min(rows - 1, row + 1);
+          r++
+        ) {
+          for (
+            let c = Math.max(0, col - 1);
+            c <= Math.min(cols - 1, col + 1);
+            c++
+          ) {
+            if (board[r][c].mine) count++;
+          }
+        }
+        return count;
+      }
 
+      // Функция отрисовки поля
+      function renderBoard() {
+        const gameDiv = document.getElementById("game");
+        gameDiv.innerHTML = "";
         for (let r = 0; r < rows; r++) {
           for (let c = 0; c < cols; c++) {
             const cell = document.createElement("div");
             cell.className = "cell";
-            cell.dataset.row = r;
-            cell.dataset.col = c;
+            const cellData = board[r][c];
 
-            cell.addEventListener("click", () => {
-              if (!cell.classList.contains("revealed")) {
-                revealCell(cell);
+            if (cellData.revealed) {
+              if (cellData.mine) {
+                cell.classList.add("mine");
+              } else if (cellData.adjacentMines > 0) {
+                cell.textContent = cellData.adjacentMines;
               }
-            });
+              cell.classList.add("revealed");
+            } else if (cellData.flagged) {
+              cell.textContent = "🚩";
+            }
 
-            // Долгое нажатие для установки флага
+            cell.addEventListener("click", () => handleClick(r, c));
             cell.addEventListener("contextmenu", (e) => {
               e.preventDefault();
-              toggleFlag(cell);
+              handleRightClick(r, c);
             });
 
-            gameBoard.appendChild(cell);
-
-            // Обработка длительного нажатия
-            let pressTimer;
-            cell.addEventListener("touchstart", () => {
-              pressTimer = setTimeout(() => {
-                toggleFlag(cell);
-              }, 500); // 500 мс для длительного нажатия
-            });
-
-            cell.addEventListener("touchend", () => {
-              clearTimeout(pressTimer);
-            });
-
-            // Убираем выделение текста при касании
-            cell.addEventListener("touchmove", (e) => {
-              e.preventDefault();
-            });
+            gameDiv.appendChild(cell);
           }
         }
       }
 
-      function revealCell(cell) {
-        const row = parseInt(cell.dataset.row);
-        const col = parseInt(cell.dataset.col);
+      // Функция обработки нажатия на ячейку
+      function handleClick(row, col) {
+        if (gameOver) return;
+        const cell = board[row][col];
+        if (cell.revealed) return;
 
-        if (board[row][col] === "X") {
-          cell.classList.add("mine");
-          gameOver(false); // Игра окончена, если нажали на мину
-        } else if (!cell.classList.contains("revealed")) {
-          cell.classList.add("revealed");
-          revealedCount++;
-          const mineCount = board[row][col];
-          if (mineCount > 0) {
-            cell.textContent = mineCount;
+        if (flagMode) {
+          // Пометка флажком
+          cell.flagged = !cell.flagged;
+          if (cell.flagged) {
+            minesLeft--;
           } else {
-            // Если вокруг нет мин, открываем соседние клетки
-            for (let r = row - 1; r <= row + 1; r++) {
-              for (let c = col - 1; c <= col + 1; c++) {
-                if (r >= 0 && r < rows && c >= 0 && c < cols) {
-                  const neighbor = document.querySelector(
-                    `.cell[data-row="${r}"][data-col="${c}"]`
-                  );
-                  if (neighbor && !neighbor.classList.contains("revealed")) {
-                    revealCell(neighbor);
-                  }
-                }
+            minesLeft++;
+          }
+          document.getElementById("minesLeft").textContent = minesLeft;
+        } else {
+          // Открытие ячейки
+          cell.revealed = true;
+          if (cell.mine) {
+            revealMines();
+            gameOver = true;
+            clearInterval(timer);
+            alert("Игра окончена! Вы наткнулись на мину.");
+          } else {
+            if (cell.adjacentMines === 0) {
+              revealEmptyCells(row, col);
+            }
+            renderBoard();
+          }
+        }
+
+        renderBoard();
+      }
+
+      // Функция обработки правого клика (пометка мины)
+      function handleRightClick(row, col) {
+        if (gameOver) return;
+        const cell = board[row][col];
+        cell.flagged = !cell.flagged; // Добавляем или убираем флаг
+        renderBoard();
+      }
+
+      // Функция раскрытия мин
+      function revealMines() {
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            if (board[r][c].mine) {
+              board[r][c].revealed = true;
+            }
+          }
+        }
+        renderBoard();
+      }
+
+      // Функция раскрытия пустых ячеек
+      function revealEmptyCells(row, col) {
+        for (
+          let r = Math.max(0, row - 1);
+          r <= Math.min(rows - 1, row + 1);
+          r++
+        ) {
+          for (
+            let c = Math.max(0, col - 1);
+            c <= Math.min(cols - 1, col + 1);
+            c++
+          ) {
+            const cell = board[r][c];
+            if (!cell.revealed && !cell.mine && !cell.flagged) {
+              cell.revealed = true;
+              if (cell.adjacentMines === 0) {
+                revealEmptyCells(r, c);
               }
             }
           }
         }
-        checkVictory();
+        renderBoard();
       }
 
-      function toggleFlag(cell) {
-        if (!cell.classList.contains("revealed")) {
-          cell.classList.toggle("flag");
-        }
-      }
-
-      function gameOver(won) {
-        clearInterval(timerInterval);
-        const cells = document.querySelectorAll(".cell");
-        cells.forEach((cell) => {
-          if (
-            cell.classList.contains("flag") &&
-            board[cell.dataset.row][cell.dataset.col] !== "X"
-          ) {
-            cell.classList.add("mine");
-          }
-          cell.removeEventListener("click", () => revealCell(cell));
-        });
-
-        const statusMessage = document.getElementById("statusMessage");
-        if (won) {
-          statusMessage.textContent = "Вы выиграли!";
-          statusMessage.className = "game-won";
-        } else {
-          statusMessage.textContent = "Игра окончена! Вы попали на мину!";
-          statusMessage.className = "game-over";
-        }
-
-        document.getElementById("restartBtn").style.display = "block";
-      }
-
-      function checkVictory() {
-        if (revealedCount === rows * cols - totalMines) {
-          gameOver(true);
-        }
-      }
-
+      // Функция запуска таймера
       function startTimer() {
-        seconds = 0;
-        document.getElementById("timer").textContent = "Время: 0";
-        timerInterval = setInterval(() => {
-          seconds++;
-          document.getElementById("timer").textContent = `Время: ${seconds}`;
+        timeTaken = 0;
+        timer = setInterval(() => {
+          timeTaken++;
+          document.getElementById("timer").textContent = timeTaken;
         }, 1000);
       }
 
-      function restartGame() {
-        createBoard();
-        createGameBoard();
-        revealedCount = 0;
-        clearInterval(timerInterval);
-        startTimer(); // Запускаем таймер
-        document.getElementById("statusMessage").textContent = ""; // Очищаем сообщение
-        document.getElementById("restartBtn").style.display = "none";
-      }
+      // Функция переключения режима
+      document.getElementById("modeButton").addEventListener("click", () => {
+        flagMode = !flagMode;
+        const modeButton = document.getElementById("modeButton");
+        if (flagMode) {
+          modeButton.style.backgroundColor = "yellow";
+          modeButton.textContent = "Флажки";
+        } else {
+          modeButton.style.backgroundColor = "white";
+          modeButton.textContent = "Открытие";
+        }
+      });
 
-      document
-        .getElementById("restartBtn")
-        .addEventListener("click", restartGame);
-
-      // Запускаем игру при загрузке страницы
-      restartGame(); // Здесь запускается игра
+      // Запуск игры
+      initGame();
     </script>
   </body>
 </html>
