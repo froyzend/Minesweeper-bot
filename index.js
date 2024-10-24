@@ -3,7 +3,7 @@ import TelegramBot from "node-telegram-bot-api";
 const TOKEN =
   process.env.TELEGRAM_TOKEN ||
   "7700362550:AAHJv47-nEaHFJGvclx7qtFzCay0opMq7zI";
-const gameName = process.env.TELEGRAM_GAMENAME || "MinesweeperGame";
+const gameName = process.env.TELEGRAM_GAMENAME || "Minesweeper";
 // Specify '0' to use ngrok i.e. localhost tunneling
 let url = process.env.URL || "https://minesweeper-bot-seven.vercel.app/";
 const port = process.env.PORT || 8080;
@@ -48,7 +48,5 @@ app.get("/", function requestListener(req, res) {
 
 // Bind server to port
 app.listen(port, function listen() {
-  console.log(
-    `Server is listening at https://minesweeper-bot-seven.vercel.app/`
-  );
+  console.log(`Server is listening at https://localhost:${port}`);
 });
