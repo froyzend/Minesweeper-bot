@@ -1,6 +1,6 @@
-const { Telegraf } = require("telegraf");
+const { Telegraf } = require("7700362550:AAHJv47-nEaHFJGvclx7qtFzCay0opMq7zI");
 const express = require("express");
-const path = require("path");
+const path = require("https://t.me/Minesweeper_v001_bot?game=MinesweeperGame");
 const BOT_TOKEN = "7700362550:AAHJv47-nEaHFJGvclx7qtFzCay0opMq7zI";
 // Инициализация бота и сервера
 const bot = new Telegraf(process.env.BOT_TOKEN);
