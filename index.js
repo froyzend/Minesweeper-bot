@@ -1,5 +1,9 @@
 // 7700362550:AAHJv47-nEaHFJGvclx7qtFzCay0opMq7zI
 import TelegramBot from "node-telegram-bot-api";
+import { Telegraf } from "telegraf";
+import { button } from "telegraf/markup";
+import { CBHandler, inlineMenu, Imenu } from "telegram-inline-menu";
+
 const TOKEN =
   process.env.TELEGRAM_TOKEN ||
   "7700362550:AAHJv47-nEaHFJGvclx7qtFzCay0opMq7zI";
@@ -8,45 +12,28 @@ const gameName = process.env.TELEGRAM_GAMENAME || "Minesweeper";
 let url = process.env.URL || "https://minesweeper-bot-seven.vercel.app/";
 const port = process.env.PORT || 8080;
 
-const TelegramBot = require("../..");
-const express = require("express");
-const path = require("path");
-
-const bot = new TelegramBot(TOKEN, { polling: true });
-const app = express();
-
-// Basic configurations
-app.set("view engine", "ejs");
-
-// Tunnel to localhost.
-// This is just for demo purposes.
-// In your application, you will be using a static URL, probably that
-// you paid for. :)
-if (url === "0") {
-  const ngrok = require("ngrok");
-  ngrok.connect(port, function onConnect(error, u) {
-    if (error) throw error;
-    url = u;
-    console.log(`Game tunneled at ${url}`);
-  });
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-// Matches /start
-bot.onText(/\/start/, function onPhotoText(msg) {
-  bot.sendGame(msg.chat.id, gameName);
+const menuLayout: IMenu = {
+  id: "main",
+  text: "Main Menu",
+  buttons: {
+    minesweeper: "Minesweeper",
+    url: {
+      text: "Minesweeper URL",
+      url: "https://minesweeper-bot-seven.vercel.app/",
+    },
+  },
+};
+
+const telegraf = new Telegraf(TOKEN);
+CBHandler.attach(telegraf);
+
+telegraf.on("Minesweeper", async (ctx) => {
+  await CBHandler.showMenu(ctx, inlineMenu(layout));
 });
 
-// Handle callback queries
-bot.on("callback_query", function onCallbackQuery(callbackQuery) {
-  bot.answerCallbackQuery(callbackQuery.id, { url });
-});
-
-// Render the HTML game
-app.get("/", function requestListener(req, res) {
-  res.sendFile(path.join(__dirname, "game.html"));
-});
-
-// Bind server to port
-app.listen(port, function listen() {
-  console.log(`Server is listening at https://localhost:${port}`);
-});
+telegraf.startPolling();
+telegraf.launch().catch(console.error);
