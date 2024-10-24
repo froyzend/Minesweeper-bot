@@ -15,6 +15,10 @@
         display: flex;
         flex-direction: column;
         align-items: center;
+        -webkit-user-select: none; /* Убираем выделение текста */
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
       }
 
       #header {
@@ -64,7 +68,6 @@
         justify-content: center;
         font-size: 12px;
         cursor: pointer;
-        user-select: none; /* Отключаем выделение текста */
       }
 
       .cell.revealed {
@@ -96,6 +99,7 @@
       let timer;
       let minesLeft = totalMines;
       let flagMode = false; // Флаг для переключения режима
+      let longPressTimer; // Таймер для долгого нажатия
 
       // Функция инициализации игры
       function initGame() {
@@ -177,11 +181,21 @@
               cell.textContent = "🚩";
             }
 
+            // Обычный клик
             cell.addEventListener("click", () => handleClick(r, c));
-            cell.addEventListener("contextmenu", (e) => {
-              e.preventDefault();
-              handleRightClick(r, c);
+
+            // Долгое нажатие для установки флага
+            cell.addEventListener("mousedown", () => {
+              longPressTimer = setTimeout(() => handleRightClick(r, c), 600); // 600ms долгого нажатия
             });
+
+            // Сброс долгого нажатия, если отпущено раньше
+            cell.addEventListener("mouseup", () =>
+              clearTimeout(longPressTimer)
+            );
+            cell.addEventListener("mouseleave", () =>
+              clearTimeout(longPressTimer)
+            );
 
             gameDiv.appendChild(cell);
           }
@@ -192,7 +206,7 @@
       function handleClick(row, col) {
         if (gameOver) return;
         const cell = board[row][col];
-        if (cell.revealed) return;
+        if (cell.revealed || cell.flagged) return; // Не открываем флажок
 
         if (flagMode) {
           // Пометка флажком
@@ -222,11 +236,16 @@
         renderBoard();
       }
 
-      // Функция обработки правого клика (пометка мины)
+      // Функция обработки установки флага (долгое нажатие)
       function handleRightClick(row, col) {
         if (gameOver) return;
         const cell = board[row][col];
-        cell.flagged = !cell.flagged; // Добавляем или убираем флаг
+        if (!cell.revealed) {
+          // Устанавливаем флажок только на неоткрытые ячейки
+          cell.flagged = !cell.flagged; // Добавляем или убираем флаг
+          minesLeft += cell.flagged ? -1 : 1;
+          document.getElementById("minesLeft").textContent = minesLeft;
+        }
         renderBoard();
       }
 
