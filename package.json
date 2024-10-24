@@ -1,5 +1,5 @@
 {
-  "name": "minesweeper_v001_bot",
+  "name": "minesweeper-bot",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
@@ -16,7 +16,7 @@
   },
   "author": "Eugene Pie",
   "license": "ISC",
-  "description": "",
+  "description": "telegram bot",
   "dependencies": {
     "express": "^4.21.1",
     "node-telegram-bot-api": "^0.66.0",
