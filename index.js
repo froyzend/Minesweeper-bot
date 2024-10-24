@@ -56,3 +56,10 @@ app.get("/", function requestListener(req, res) {
 app.listen(port, function listen() {
   console.log(`Server is listening at http://localhost:${port}`);
 });
+
+bot.on("message", (msg) => {
+  var Hi = "hi";
+  if (msg.text.toString().toLowerCase().indexOf(Hi) === 0) {
+    bot.sendMessage(msg.chat.id, "Hello dear user");
+  }
+});
