@@ -83,7 +83,8 @@
       }
 
       .cell.mine {
-        background-color: red;
+        
+        text: "💣"
       }
     </style>
   </head>
@@ -93,13 +94,13 @@
       <button
         id="modeButton"
         class="button-icon"
-        src="Images/shovel.png"
+        text="🪓"
         width: 40px; height: 40px;
       ></button>
       <button
         id="restartButton"
         class="button-icon"
-        src="Images/restart1.jpg"
+        text="🔄"
         width: 40px; height: 40px;
       ></button>
       <div id="timer" class="info-box">0</div>
@@ -353,9 +354,11 @@
         flagMode = !flagMode;
         const modeButton = document.getElementById("modeButton");
         if (flagMode) {
-          modeButton.style.backgroundImage = "url('images/flag.png')";
+          //modeButton.style.backgroundImage = "url('images/flag.png')";
+          modeButton.textContent = "🚩";
         } else {
-          modeButton.style.backgroundImage = "url('images/shovel.png')";
+          //modeButton.style.backgroundImage = "url('images/shovel.png')";
+          modeButton.textContent = "🪓";
         }
       });
 
