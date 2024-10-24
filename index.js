@@ -11,7 +11,7 @@ let scoreboard = []; // Скорборд для записи лучших рез
 const maxScoreboardEntries = 10; // Количество записей в скорборде
 
 // Устанавливаем сервер для статических файлов (index.html)
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "/Minesweeper-bot")));
 
 // Telegram команда /start
 bot.start((ctx) =>
