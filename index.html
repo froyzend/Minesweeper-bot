@@ -41,7 +41,7 @@
       .button-icon {
         width: 40px;
         height: 40px;
-        background-color: white;
+
         border: none;
         border-radius: 50%;
         cursor: pointer;
@@ -50,11 +50,11 @@
       }
 
       #modeButton {
-        background-image: url("shovel.png");
+        background-image: url("images/shovel.png");
       }
 
       #restartButton {
-        background-image: url("restart.png");
+        background-image: url("images/restart.png");
       }
 
       #game {
@@ -325,9 +325,9 @@
         flagMode = !flagMode;
         const modeButton = document.getElementById("modeButton");
         if (flagMode) {
-          modeButton.style.backgroundImage = "url('flag.png')";
+          modeButton.style.backgroundImage = "url('images/flag.png')";
         } else {
-          modeButton.style.backgroundImage = "url('shovel.png')";
+          modeButton.style.backgroundImage = "url('images/shovel.png')";
         }
       });
 
