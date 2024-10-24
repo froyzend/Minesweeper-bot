@@ -27,9 +27,9 @@
       .info-box {
         background-color: black;
         color: red;
-        font-size: 24px;
-        padding: 10px;
-        width: 100px;
+        font-size: 20px;
+        padding: 5px;
+        width: 80px;
         text-align: center;
         border-radius: 5px;
       }
@@ -37,7 +37,7 @@
       #modeButton {
         background-color: white;
         color: black;
-        font-size: 20px;
+        font-size: 16px;
         padding: 10px;
         border: none;
         border-radius: 5px;
@@ -47,22 +47,22 @@
 
       #game {
         display: grid;
-        grid-template-columns: repeat(9, 40px);
-        grid-template-rows: repeat(15, 40px);
+        grid-template-columns: repeat(18, 20px); /* 18 столбцов */
+        grid-template-rows: repeat(25, 20px); /* 25 строк */
         gap: 1px;
         margin: 20px auto;
         position: relative;
       }
 
       .cell {
-        width: 40px;
-        height: 40px;
+        width: 20px; /* Размер ячейки вдвое меньше */
+        height: 20px; /* Размер ячейки вдвое меньше */
         background-color: #eee;
         border: 1px solid #ccc;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 18px;
+        font-size: 12px;
         cursor: pointer;
         user-select: none; /* Отключаем выделение текста */
       }
@@ -79,7 +79,7 @@
   </head>
   <body>
     <div id="header">
-      <div id="minesLeft" class="info-box">16</div>
+      <div id="minesLeft" class="info-box">75</div>
       <button id="modeButton">Открытие</button>
       <div id="timer" class="info-box">0</div>
     </div>
@@ -87,9 +87,9 @@
     <div id="game"></div>
 
     <script>
-      const rows = 15;
-      const cols = 9;
-      const totalMines = 16;
+      const rows = 25;
+      const cols = 18;
+      const totalMines = 75;
       let board = [];
       let gameOver = false;
       let timeTaken = 0;
