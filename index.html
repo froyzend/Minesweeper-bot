@@ -2,90 +2,100 @@
 <html lang="ru">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Сапер</title>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>Minesweeper</title>
     <style>
       body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        overflow: hidden;
         display: flex;
         flex-direction: column;
         align-items: center;
-        background-color: #f0f0f0;
+        -webkit-user-select: none; /* Убираем выделение текста */
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
       }
 
       #header {
         display: flex;
         justify-content: space-between;
-        width: 100%;
+        width: 360px;
+        margin: 20px;
+      }
+
+      .info-box {
         background-color: black;
         color: red;
-        padding: 10px;
-        font-size: 24px;
-        position: relative;
+        font-size: 20px;
+        padding: 5px;
+        width: 80px;
+        text-align: center;
+        border-radius: 5px;
+      }
+
+      .button-icon {
+        width: 40px;
+        height: 40px;
+        background-color: white;
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+        background-size: cover;
+        background-position: center;
+      }
+
+      #modeButton {
+        background-image: url("shovel.png");
+      }
+
+      #restartButton {
+        background-image: url("restart.png");
       }
 
       #game {
         display: grid;
-        grid-template-columns: repeat(18, 30px);
-        grid-template-rows: repeat(25, 30px);
-        gap: 2px;
-        margin-top: 10px;
+        grid-template-columns: repeat(18, 20px); /* 18 столбцов */
+        grid-template-rows: repeat(25, 20px); /* 25 строк */
+        gap: 1px;
+        margin: 20px auto;
+        position: relative;
       }
 
       .cell {
-        width: 30px;
-        height: 30px;
-        background-color: #e0e0e0;
+        width: 20px; /* Размер ячейки вдвое меньше */
+        height: 20px; /* Размер ячейки вдвое меньше */
+        background-color: #eee;
+        border: 1px solid #ccc;
         display: flex;
-        justify-content: center;
         align-items: center;
-        border: 1px solid #999;
-        font-size: 18px;
+        justify-content: center;
+        font-size: 12px;
         cursor: pointer;
       }
 
-      .revealed {
+      .cell.revealed {
         background-color: #fff;
+        cursor: default;
       }
 
-      .mine {
+      .cell.mine {
         background-color: red;
-      }
-
-      .button {
-        border: none;
-        cursor: pointer;
-        margin: 5px;
-        padding: 10px;
-        font-size: 24px;
-        color: black;
-        border-radius: 50%; /* Круглая форма кнопок */
-        width: 40px; /* Ширина кнопок */
-        height: 40px; /* Высота кнопок */
-        display: flex;
-        justify-content: center;
-        align-items: center;
-      }
-
-      #modeButton {
-        background-color: white;
-        color: black;
-      }
-
-      #restartButton {
-        background-color: white;
-        color: black;
       }
     </style>
   </head>
   <body>
     <div id="header">
-      <div id="minesLeft">Мины: 75</div>
-      <div id="timer">0</div>
+      <div id="minesLeft" class="info-box">75</div>
+      <button id="modeButton" class="button-icon"></button>
+      <button id="restartButton" class="button-icon"></button>
+      <div id="timer" class="info-box">0</div>
     </div>
-    <div>
-      <button id="modeButton" class="button">О</button>
-      <button id="restartButton" class="button">🔄</button>
-    </div>
+
     <div id="game"></div>
 
     <script>
@@ -97,7 +107,7 @@
       let timeTaken = 0;
       let timer;
       let minesLeft = totalMines;
-      let flagMode = false;
+      let flagMode = false; // Флаг для переключения режима
       let longPressTimer; // Таймер для долгого нажатия
 
       // Функция инициализации игры
@@ -178,7 +188,7 @@
               }
               cell.classList.add("revealed");
             } else if (cellData.flagged) {
-              cell.textContent = "🚩"; // Флаг
+              cell.textContent = "🚩";
             }
 
             // Обычный клик
@@ -225,7 +235,6 @@
             gameOver = true;
             clearInterval(timer);
             alert("Игра окончена! Вы наткнулись на мину.");
-            showScoreboard(); // Отображаем скорборд после поражения
           } else {
             if (cell.adjacentMines === 0) {
               revealEmptyCells(row, col);
@@ -235,7 +244,6 @@
         }
 
         renderBoard();
-        checkWin(); // Проверяем, если победа
       }
 
       // Функция обработки установки флага (долгое нажатие)
@@ -251,104 +259,71 @@
         renderBoard();
       }
 
-      // Функция проверки победы
-      function checkWin() {
-        let revealedCount = 0;
-        let correctFlags = 0;
-
+      // Функция раскрытия мин
+      function revealMines() {
         for (let r = 0; r < rows; r++) {
           for (let c = 0; c < cols; c++) {
-            const cell = board[r][c];
-            if (cell.revealed) {
-              revealedCount++;
-            }
-            if (cell.flagged && cell.mine) {
-              correctFlags++;
+            if (board[r][c].mine) {
+              board[r][c].revealed = true;
             }
           }
         }
-
-        if (revealedCount === rows * cols - totalMines) {
-          gameOver = true;
-          clearInterval(timer);
-          alert("Поздравляем, вы выиграли!");
-          showScoreboard(); // Отображаем скорборд после выигрыша
-        }
+        renderBoard();
       }
 
-      // Функция открытия соседних ячеек
+      // Функция раскрытия пустых ячеек
       function revealEmptyCells(row, col) {
-        const stack = [[row, col]];
-        while (stack.length > 0) {
-          const [r, c] = stack.pop();
-          const cell = board[r][c];
-          if (!cell.revealed) {
-            cell.revealed = true;
-            if (cell.adjacentMines === 0) {
-              for (let newRow = r - 1; newRow <= r + 1; newRow++) {
-                for (let newCol = c - 1; newCol <= c + 1; newCol++) {
-                  if (
-                    newRow >= 0 &&
-                    newRow < rows &&
-                    newCol >= 0 &&
-                    newCol < cols
-                  ) {
-                    stack.push([newRow, newCol]);
-                  }
-                }
+        for (
+          let r = Math.max(0, row - 1);
+          r <= Math.min(rows - 1, row + 1);
+          r++
+        ) {
+          for (
+            let c = Math.max(0, col - 1);
+            c <= Math.min(cols - 1, col + 1);
+            c++
+          ) {
+            const cell = board[r][c];
+            if (!cell.revealed && !cell.mine && !cell.flagged) {
+              cell.revealed = true;
+              if (cell.adjacentMines === 0) {
+                revealEmptyCells(r, c);
               }
             }
           }
         }
-        renderBoard();
       }
 
-      // Функция открытия всех мин
-      function revealMines() {
-        for (let r = 0; r < rows; r++) {
-          for (let c = 0; c < cols; c++) {
-            const cell = board[r][c];
-            if (cell.mine) {
-              cell.revealed = true;
-            }
-          }
-        }
-        renderBoard();
-      }
-
-      // Функция старта таймера
+      // Функция запуска таймера
       function startTimer() {
         timeTaken = 0;
+        clearInterval(timer);
         timer = setInterval(() => {
           timeTaken++;
           document.getElementById("timer").textContent = timeTaken;
         }, 1000);
       }
 
-      // Функция отображения скорборда (можно заменить на вашу реализацию)
-      function showScoreboard() {
-        // Здесь нужно добавить код для отображения скорборда, который вы уже реализовали
-        alert("Отображение скорборда");
-      }
-
-      // Событие для перезапуска игры
+      // Функция перезапуска игры
       document.getElementById("restartButton").addEventListener("click", () => {
+        clearInterval(timer);
+        minesLeft = totalMines;
+        document.getElementById("timer").textContent = "0";
         initGame();
       });
 
-      // Событие для переключения режимов
+      // Функция переключения режима
       document.getElementById("modeButton").addEventListener("click", () => {
         flagMode = !flagMode;
-        document.getElementById("modeButton").textContent = flagMode
-          ? "Ф"
-          : "О"; // Изменяем текст кнопки
-        document.getElementById("modeButton").style.backgroundColor = flagMode
-          ? "yellow"
-          : "white"; // Меняем цвет кнопки
-        renderBoard();
+        const modeButton = document.getElementById("modeButton");
+        if (flagMode) {
+          modeButton.style.backgroundImage = "url('flag.png')";
+        } else {
+          modeButton.style.backgroundImage = "url('shovel.png')";
+        }
       });
 
-      // Инициализация игры при загрузке
+      // Запуск игры
       initGame();
     </script>
   </body>
