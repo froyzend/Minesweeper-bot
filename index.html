@@ -38,15 +38,23 @@
         border-radius: 5px;
       }
 
-      #modeButton {
+      .button-icon {
+        width: 40px;
+        height: 40px;
         background-color: white;
-        color: black;
-        font-size: 16px;
-        padding: 10px;
         border: none;
-        border-radius: 5px;
+        border-radius: 50%;
         cursor: pointer;
-        width: 150px;
+        background-size: cover;
+        background-position: center;
+      }
+
+      #modeButton {
+        background-image: url("shovel.png");
+      }
+
+      #restartButton {
+        background-image: url("restart.png");
       }
 
       #game {
@@ -83,7 +91,8 @@
   <body>
     <div id="header">
       <div id="minesLeft" class="info-box">75</div>
-      <button id="modeButton">Открытие</button>
+      <button id="modeButton" class="button-icon"></button>
+      <button id="restartButton" class="button-icon"></button>
       <div id="timer" class="info-box">0</div>
     </div>
 
@@ -107,6 +116,7 @@
         renderBoard();
         startTimer();
         document.getElementById("minesLeft").textContent = minesLeft;
+        gameOver = false;
       }
 
       // Функция создания поля игры
@@ -282,28 +292,34 @@
             }
           }
         }
-        renderBoard();
       }
 
       // Функция запуска таймера
       function startTimer() {
         timeTaken = 0;
+        clearInterval(timer);
         timer = setInterval(() => {
           timeTaken++;
           document.getElementById("timer").textContent = timeTaken;
         }, 1000);
       }
 
+      // Функция перезапуска игры
+      document.getElementById("restartButton").addEventListener("click", () => {
+        clearInterval(timer);
+        minesLeft = totalMines;
+        document.getElementById("timer").textContent = "0";
+        initGame();
+      });
+
       // Функция переключения режима
       document.getElementById("modeButton").addEventListener("click", () => {
         flagMode = !flagMode;
         const modeButton = document.getElementById("modeButton");
         if (flagMode) {
-          modeButton.style.backgroundColor = "yellow";
-          modeButton.textContent = "Флажки";
+          modeButton.style.backgroundImage = "url('flag.png')";
         } else {
-          modeButton.style.backgroundColor = "white";
-          modeButton.textContent = "Открытие";
+          modeButton.style.backgroundImage = "url('shovel.png')";
         }
       });
 
