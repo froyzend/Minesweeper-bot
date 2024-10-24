@@ -5,17 +5,18 @@ import { CBHandler, inlineMenu, Imenu } from "telegram-inline-menu";
 const TOKEN =
   process.env.TELEGRAM_TOKEN ||
   "7700362550:AAHJv47-nEaHFJGvclx7qtFzCay0opMq7zI";
-const gameName = process.env.TELEGRAM_GAMENAME || "Minesweeper";
-// Specify '0' to use ngrok i.e. localhost tunneling
-let url = process.env.URL || "https://minesweeper-bot-seven.vercel.app/";
 
-const bot = new TelegramBot(TOKEN, { polling: true });
+const { Telegraf } = require("telegraf");
 
-bot.on("inline_query", (query) => {
-  const gameUrl = url; // Replace with your game URL
+// Replace with your bot token from BotFather
+const bot = new Telegraf(TOKEN);
 
-  // Create an article to return as inline query result
-  const results = [
+// Handle inline queries
+bot.on("inline_query", (ctx) => {
+  const gameUrl = "https://minesweeper-bot-seven.vercel.app/"; // Replace with your actual game URL
+
+  // Create an article result to send when inline query is triggered
+  const result = [
     {
       type: "article",
       id: "1", // Unique ID for the inline query result
@@ -31,16 +32,16 @@ bot.on("inline_query", (query) => {
     },
   ];
 
-  // Send results to Telegram
-  bot.answerInlineQuery(query.id, results, { cache_time: 0 });
+  // Respond to the inline query with the result
+  ctx.answerInlineQuery(result);
 });
 
-// Handle basic /start command (optional)
-bot.onText(/\/start/, (msg) => {
-  bot.sendMessage(
-    msg.chat.id,
-    "Welcome! Type @Minesweeper_v001_bot to play the game."
-  );
-});
+// Optional: Handle /start command
+bot.start((ctx) =>
+  ctx.reply("Welcome! Type @Minesweeper_v001_bot to play the game.")
+);
+
+// Launch the bot
+bot.launch();
 
 console.log("Bot is running...");
