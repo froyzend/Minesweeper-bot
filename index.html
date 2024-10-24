@@ -28,6 +28,7 @@
         grid-template-columns: repeat(18, 30px);
         grid-template-rows: repeat(25, 30px);
         gap: 2px;
+        margin-top: 10px;
       }
 
       .cell {
@@ -57,10 +58,12 @@
         padding: 10px;
         font-size: 24px;
         color: black;
-      }
-
-      .hidden {
-        display: none;
+        border-radius: 50%; /* Круглая форма кнопок */
+        width: 40px; /* Ширина кнопок */
+        height: 40px; /* Высота кнопок */
+        display: flex;
+        justify-content: center;
+        align-items: center;
       }
 
       #modeButton {
@@ -79,8 +82,10 @@
       <div id="minesLeft">Мины: 75</div>
       <div id="timer">0</div>
     </div>
-    <button id="modeButton" class="button">О</button>
-    <button id="restartButton" class="button">🔄</button>
+    <div>
+      <button id="modeButton" class="button">О</button>
+      <button id="restartButton" class="button">🔄</button>
+    </div>
     <div id="game"></div>
 
     <script>
@@ -280,10 +285,8 @@
           if (!cell.revealed) {
             cell.revealed = true;
             if (cell.adjacentMines === 0) {
-              for (let dr = -1; dr <= 1; dr++) {
-                for (let dc = -1; dc <= 1; dc++) {
-                  const newRow = r + dr;
-                  const newCol = c + dc;
+              for (let newRow = r - 1; newRow <= r + 1; newRow++) {
+                for (let newCol = c - 1; newCol <= c + 1; newCol++) {
                   if (
                     newRow >= 0 &&
                     newRow < rows &&
