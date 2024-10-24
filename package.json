@@ -124,7 +124,7 @@
     "ms": "^2.0.0",
     "negotiator": "^0.6.3",
     "node-fetch": "^2.7.0",
-    "node-telegram-bot-api": "^0.63.0",
+    "node-telegram-bot-api": "^0.66.0",
     "oauth-sign": "^0.9.0",
     "object-inspect": "^1.13.2",
     "object-keys": "^1.1.1",
