@@ -201,18 +201,7 @@
             // Обычный клик
             cell.addEventListener("click", () => handleClick(r, c));
 
-            /*             // Долгое нажатие для установки флага
-            cell.addEventListener("mousedown", () => {
-              longPressTimer = setTimeout(() => handleRightClick(r, c), 600); // 600ms долгого нажатия
-            });
-
-            // Сброс долгого нажатия, если отпущено раньше
-            cell.addEventListener("mouseup", () =>
-              clearTimeout(longPressTimer)
-            );
-            cell.addEventListener("mouseleave", () =>
-              clearTimeout(longPressTimer)
-            ); */
+            // Долгое нажатие
             let longPressTimer;
 
             cell.addEventListener("mousedown", () => {
@@ -246,7 +235,7 @@
       }
 
       // Функция обработки нажатия на ячейку
-      function handleClick(row, col) {
+ /*    function handleClick(row, col) {
         if (gameOver) return;
         const cell = board[row][col];
         if (cell.revealed || cell.flagged) return; // Не открываем флажок
@@ -277,8 +266,52 @@
         }
 
         renderBoard();
-      }
+      } */
 
+      function handleClick(row, col) {
+        if (gameOver) return;
+        const cell = board[row][col];
+
+        // Prevent actions if the cell is revealed or flagged
+        if (cell.revealed || cell.flagged) return; // Не открываем флажок
+
+        // Logic for flagging the cell
+        if (flagMode) {
+            // Пометка флажком
+            cell.flagged = !cell.flagged;
+            if (cell.flagged) {
+                minesLeft--;
+            } else {
+                minesLeft++;
+            }
+            document.getElementById("minesLeft").textContent = minesLeft;
+        } else {
+            // Logic for opening the cell
+            cell.revealed = true;
+            if (cell.mine) {
+                revealMines();
+                gameOver = true;
+                clearInterval(timer);
+                alert("Игра окончена! Вы наткнулись на мину.");
+            } else {
+                if (cell.adjacentMines === 0) {
+                    revealEmptyCells(row, col);
+                }
+                renderBoard();
+            }
+        }
+
+        renderBoard();
+    }
+
+    // Add event listeners to your cell elements
+    function addCellEventListeners(cellElement, row, col) {
+        cellElement.addEventListener('click', () => handleClick(row, col)); // Mouse click
+        cellElement.addEventListener('touchstart', (event) => {
+            event.preventDefault(); // Prevent default touch behavior
+            handleClick(row, col); // Handle touch
+        });
+    }
       // Функция обработки установки флага (долгое нажатие)
       function handleRightClick(row, col) {
         if (gameOver) return;
@@ -290,7 +323,7 @@
           document.getElementById("minesLeft").textContent = minesLeft;
         }
         renderBoard();
-      }
+      } 
 
       // Функция раскрытия мин
       function revealMines() {
