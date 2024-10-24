@@ -80,8 +80,7 @@
       }
 
       .cell.mine {
-        
-        text: "💣"
+        background-color: rgb(255, 255, 255);
       }
     </style>
   </head>
@@ -189,6 +188,7 @@
             if (cellData.revealed) {
               if (cellData.mine) {
                 cell.classList.add("mine");
+                cell.textContent = "💣";
               } else if (cellData.adjacentMines > 0) {
                 cell.textContent = cellData.adjacentMines;
               }
@@ -234,40 +234,7 @@
         }
       }
 
-      // Функция обработки нажатия на ячейку
- /*    function handleClick(row, col) {
-        if (gameOver) return;
-        const cell = board[row][col];
-        if (cell.revealed || cell.flagged) return; // Не открываем флажок
-
-        if (flagMode) {
-          // Пометка флажком
-          cell.flagged = !cell.flagged;
-          if (cell.flagged) {
-            minesLeft--;
-          } else {
-            minesLeft++;
-          }
-          document.getElementById("minesLeft").textContent = minesLeft;
-        } else {
-          // Открытие ячейки
-          cell.revealed = true;
-          if (cell.mine) {
-            revealMines();
-            gameOver = true;
-            clearInterval(timer);
-            alert("Игра окончена! Вы наткнулись на мину.");
-          } else {
-            if (cell.adjacentMines === 0) {
-              revealEmptyCells(row, col);
-            }
-            renderBoard();
-          }
-        }
-
-        renderBoard();
-      } */
-
+      // Функция обработки кликов
       function handleClick(row, col) {
         if (gameOver) return;
         const cell = board[row][col];
