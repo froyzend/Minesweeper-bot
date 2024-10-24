@@ -1,5 +1,5 @@
 {
-  "name": "minesweeper-bot",
+  "name": "minesweeper_v001_bot",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
