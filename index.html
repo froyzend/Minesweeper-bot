@@ -49,11 +49,11 @@
       }
 
       #modeButton {
-        background-image: url("https://via.placeholder.com/50");
+        background-image: url("images/shovel.png");
       }
 
       #restartButton {
-        background-image: url("images/restart.png");
+        background-image: url("images/restart1.jpg");
       }
 
       #game {
@@ -98,7 +98,7 @@
       <button
         id="restartButton"
         class="button-icon"
-        src="Images/restart.png"
+        src="Images/restart1.jpg"
       ></button>
       <div id="timer" class="info-box">0</div>
     </div>
@@ -195,6 +195,7 @@
               }
               cell.classList.add("revealed");
             } else if (cellData.flagged) {
+              cell.textContent = "🚩";
               cell.backgroundImage = "url('images/flag.png')";
             }
 
