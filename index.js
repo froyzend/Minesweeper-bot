@@ -11,7 +11,7 @@ const { Telegraf } = require("telegraf");
 // Replace with your bot token from BotFather
 const bot = new Telegraf(TOKEN);
 
-bot.command('start', ctx => {
+bot.command('play', ctx => {
     let StartMsg = 'Play Minesweeper and gain respect!';
     bot.telegram.sendMessage(ctx.chat.id, StartMsg,
         {
