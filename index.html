@@ -307,10 +307,13 @@
     // Add event listeners to your cell elements
     function addCellEventListeners(cellElement, row, col) {
         cellElement.addEventListener('click', () => handleClick(row, col)); // Mouse click
-        cellElement.addEventListener('touchstart', (event) => {
-            event.preventDefault(); // Prevent default touch behavior
-            handleClick(row, col); // Handle touch
-        });
+       // cellElement.addEventListener('touchstart', (event) => {
+       //     event.preventDefault(); // Prevent default touch behavior
+         //   handleClick(row, col); // Handle touch
+      //  });
+        cellElement.addEventListener("touchend", () => {
+              handleClick(row, col);
+            });
     }
       // Функция обработки установки флага (долгое нажатие)
       function handleRightClick(row, col) {
