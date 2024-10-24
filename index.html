@@ -38,14 +38,17 @@
         border-radius: 5px;
       }
 
-      .button-icon {
-        width: 40px; /* Задайте нужную ширину */
-        height: 40px; /* Задайте нужную высоту */
-        background-size: contain; /* Это важно для корректного отображения */
-        background-repeat: no-repeat; /* Изображение не должно повторяться */
-        border: none; /* Уберите рамку, если не нужна */
-        display: inline-block;
-        cursor: pointer;
+      .button-text {
+          width: 40px; /* Задайте нужную ширину */
+          height: 40px; /* Задайте нужную высоту */
+          font-size: 12px; /* Размер шрифта */
+          border: none; /* Уберите рамку, если не нужна */
+          
+          cursor: pointer; /* Измените курсор, чтобы указать на кликабельность */
+          display: inline-block; /* Отображение как блочный элемент */
+          text-align: center; /* Центрирование текста */
+          border-radius: 5px; /* Скругление углов */
+      
       }
 
       #modeButton {
@@ -94,15 +97,14 @@
       <button
         id="modeButton"
         class="button-icon"
-        text="🪓"
+     
         width: 40px; height: 40px;
-      ></button>
+      >🪓</button>
       <button
         id="restartButton"
         class="button-icon"
-        text="🔄"
         width: 40px; height: 40px;
-      ></button>
+      >🔄</button>
       <div id="timer" class="info-box">0</div>
     </div>
 
