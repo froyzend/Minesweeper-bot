@@ -18,7 +18,7 @@ bot.on("inline_query", (query) => {
   const results = [
     {
       type: "article",
-      id: "1",
+      id: "1", // Unique ID for the inline query result
       title: "Play Minesweeper Game",
       input_message_content: {
         message_text: `Play Minesweeper: [Click here to start!](${gameUrl})`,
@@ -32,7 +32,7 @@ bot.on("inline_query", (query) => {
   ];
 
   // Send results to Telegram
-  bot.answerInlineQuery(query.id, results);
+  bot.answerInlineQuery(query.id, results, { cache_time: 0 });
 });
 
 // Handle basic /start command (optional)
