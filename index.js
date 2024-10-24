@@ -1,15 +1,10 @@
-// 7700362550:AAHJv47-nEaHFJGvclx7qtFzCay0opMq7zI
-import TelegramBot from "node-telegram-bot-api";
-import { CBHandler, inlineMenu, Imenu } from "telegram-inline-menu";
+// 7700362550:AAHJv47-nEaHFJGvclx7qtFzCay0opMq7zIimport TelegramBot from "node-telegram-bot-api";mport { CBHandler, inlineMenu, Imenu } from "telegram-inline-menu";
 
-const TOKEN =
-  process.env.TELEGRAM_TOKEN ||
-  "7700362550:AAHJv47-nEaHFJGvclx7qtFzCay0opMq7zI";
+const TOKEN = "7700362550:AAHJv47-nEaHFJGvclx7qtFzCay0opMq7zI";
 
 const { Telegraf } = require("telegraf");
-
-// Replace with your bot token from BotFather
 const bot = new Telegraf(TOKEN);
+const axios = require('axios');
 
 bot.command('play', ctx => {
     let StartMsg = 'Play Minesweeper and gain respect!';
@@ -17,9 +12,11 @@ bot.command('play', ctx => {
         {
             reply_markup: {
                 inline_keyboard: [
-                    [(text: "Minesweeper", url:"https://minesweeper-bot-seven.vercel.app/")]
+                    [(text: "Minesweeper", url: "https://minesweeper-bot-seven.vercel.app/")]
                 ]
             }
         }
     )
-})
+});
+
+bot.launch();
