@@ -51,11 +51,12 @@
       }
 
       .button {
-        background-color: white;
         border: none;
         cursor: pointer;
         margin: 5px;
         padding: 10px;
+        font-size: 24px;
+        color: black;
       }
 
       .hidden {
@@ -63,17 +64,13 @@
       }
 
       #modeButton {
-        background-image: url("shovel.png");
-        background-size: cover;
-        width: 50px;
-        height: 50px;
+        background-color: white;
+        color: black;
       }
 
       #restartButton {
-        background-image: url("restart.png");
-        background-size: cover;
-        width: 50px;
-        height: 50px;
+        background-color: white;
+        color: black;
       }
     </style>
   </head>
@@ -82,10 +79,10 @@
       <div id="minesLeft">Мины: 75</div>
       <div id="timer">0</div>
     </div>
-    <button id="modeButton" class="button"></button>
-    <button id="restartButton" class="button"></button>
+    <button id="modeButton" class="button">О</button>
+    <button id="restartButton" class="button">🔄</button>
     <div id="game"></div>
-    <script src="index.js"></script>
+
     <script>
       const rows = 25;
       const cols = 18;
@@ -300,6 +297,7 @@
             }
           }
         }
+        renderBoard();
       }
 
       // Функция открытия всех мин
@@ -338,9 +336,12 @@
       // Событие для переключения режимов
       document.getElementById("modeButton").addEventListener("click", () => {
         flagMode = !flagMode;
-        document.getElementById("modeButton").style.backgroundImage = flagMode
-          ? "url('flag.png')"
-          : "url('shovel.png')";
+        document.getElementById("modeButton").textContent = flagMode
+          ? "Ф"
+          : "О"; // Изменяем текст кнопки
+        document.getElementById("modeButton").style.backgroundColor = flagMode
+          ? "yellow"
+          : "white"; // Меняем цвет кнопки
         renderBoard();
       });
 
