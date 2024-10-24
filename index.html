@@ -202,7 +202,7 @@
             // Обычный клик
             cell.addEventListener("click", () => handleClick(r, c));
 
-            // Долгое нажатие для установки флага
+            /*             // Долгое нажатие для установки флага
             cell.addEventListener("mousedown", () => {
               longPressTimer = setTimeout(() => handleRightClick(r, c), 600); // 600ms долгого нажатия
             });
@@ -213,7 +213,33 @@
             );
             cell.addEventListener("mouseleave", () =>
               clearTimeout(longPressTimer)
-            );
+            ); */
+            let longPressTimer;
+
+            cell.addEventListener("mousedown", () => {
+              longPressTimer = setTimeout(() => {
+                handleRightClick(r, c);
+              }, 600);
+            });
+
+            cell.addEventListener("mouseup", () => {
+              clearTimeout(longPressTimer);
+            });
+
+            cell.addEventListener("mouseleave", () => {
+              clearTimeout(longPressTimer);
+            });
+
+            // Добавление события touchstart для мобильных устройств
+            cell.addEventListener("touchstart", () => {
+              longPressTimer = setTimeout(() => {
+                handleRightClick(r, c);
+              }, 600);
+            });
+
+            cell.addEventListener("touchend", () => {
+              clearTimeout(longPressTimer);
+            });
 
             gameDiv.appendChild(cell);
           }
